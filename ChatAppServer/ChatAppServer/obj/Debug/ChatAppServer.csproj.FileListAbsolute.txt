@@ -27,3 +27,6 @@ C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\De
 C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\EntityFramework.xml
 C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\EntityFramework.SqlServer.xml
 C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\System.Data.SQLite.xml
+C:\Users\Thomas\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\ChatAppServer.exe.config
+C:\Users\Thomas\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\obj\Debug\ChatAppServer.exe
+C:\Users\Thomas\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\obj\Debug\ChatAppServer.pdb

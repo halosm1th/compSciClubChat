@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace ChatAppServer
 {
-    public class Program
+    public class chatApp
     {
         //These variables I want to be able to accesss no mater what, so it is helpful to have them global.
 
