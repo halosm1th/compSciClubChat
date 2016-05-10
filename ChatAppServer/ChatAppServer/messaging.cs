@@ -24,16 +24,20 @@ namespace ChatAppServer
                 if (login(streamreader, streamWriter) != true)
                 {
                     streamWriter.WriteLine("Error incorret username or password.");
+                    streamWriter.Flush();
                 }
                 understand(networkStream);
             }
             else if (message == "register")
             {
+                Console.WriteLine("Registering user");
+
                 register(streamreader, streamWriter);
             }
             else
             {
                 streamWriter.WriteLine("Error not valid command.");
+                streamWriter.Flush();
             }
         }
 
@@ -81,17 +85,21 @@ namespace ChatAppServer
             if (line == username)
             {
                 streamWriter.WriteLine("error username is taken");
+                streamWriter.Flush();
+                chatApp.Error("Some already has that name");
             }
             else
             {
-                sqlStatement = "INSTERT INTO users (id, username, password) values (@username,@password,@id);";
-                id = random.Next(1, int.MaxValue);
+                sqlStatement = "INSERT INTO users (id, username, password) values (@id, @username,@password);";
+                id = random.Next(1, int.MaxValue/2);
                 command = new SQLiteCommand(sqlStatement, chatApp.m_dbConnection);
                 command.Parameters.AddWithValue("@username", username);
                 command.Parameters.AddWithValue("@password", password);
                 command.Parameters.AddWithValue("@id", id);
                 command.ExecuteNonQuery();
-
+                streamWriter.Close();
+                streamreader.Close();
+                chatApp.Success("Someone has added the user: " + username);
             }
             
         }

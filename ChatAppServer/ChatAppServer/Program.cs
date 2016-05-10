@@ -155,6 +155,7 @@ namespace ChatAppServer
                     var networkStream = new NetworkStream(socket);
                     Success("Network stream created");
                     Console.Write(">> ");
+                    messaging.conected(networkStream);
                     networkStream.Close();
                     tcpListener.Stop();
                 }
