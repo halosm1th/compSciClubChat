@@ -59,7 +59,7 @@ namespace ChatAppServer
             }
             else
             {
-                Console.WriteLine("Database found.");
+                Console.WriteLine("Database found.");//Open hte database
                 m_dbConnection = new SQLiteConnection("Data Source=users.sqlite;Version=3;");
                 m_dbConnection.Open();
 
@@ -68,13 +68,9 @@ namespace ChatAppServer
             }
             Console.Write("Enter a port to start on: ");//Get the port to run on
             port = Convert.ToInt32(Console.ReadLine());
-            m_dbConnection.Close();
-            m_dbConnection2.Close();
             while (true)//run forver
             {
                 connect(m_dbConnection, m_dbConnection2);
-                m_dbConnection.Close();
-                m_dbConnection2.Close();
             }
         }
 
@@ -83,15 +79,16 @@ namespace ChatAppServer
          */
         public static void connect(SQLiteConnection db1, SQLiteConnection db2)
         {
-            try
+            try//Simple try catch block
             {
-                var tcpLister = new TcpListener(ipadress, port);
-                tcpLister.Start();
-                Socket socket = tcpLister.AcceptSocket();
-                Console.WriteLine("Connection started");
+                var tcpLister = new TcpListener(ipadress, port);//Create a listen for connections
+                tcpLister.Start();//Start the listener
+                Socket socket = tcpLister.AcceptSocket();//Create anew socket when the listen is connected to
+                Console.WriteLine("Connection started");//Write that we have a connection
 
-                var networkStream = new NetworkStream(socket);
-                string ip = Convert.ToString(socket.RemoteEndPoint);
+                var networkStream = new NetworkStream(socket);//The network stream
+                string ip = Convert.ToString(socket.RemoteEndPoint);//get the ipadress
+                
                 getData(networkStream, ip, db1, db2);
 
                 networkStream.Close();
@@ -112,10 +109,7 @@ namespace ChatAppServer
             var streamReader = new StreamReader(networkStream);
             var streamWriter = new StreamWriter(networkStream);
             string line = "l|l";
-            db1.Open();
-            db2.Open();
-            streamWriter.WriteLine("It Worked!");
-            streamWriter.Flush();
+            writeData("it worked!", streamWriter);
             writeData("1", streamWriter);
             string message = streamReader.ReadLine();
            if (message == "1")

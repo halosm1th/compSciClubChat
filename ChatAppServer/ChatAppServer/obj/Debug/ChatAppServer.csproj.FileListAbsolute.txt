@@ -13,3 +13,17 @@ C:\Users\haloguysm1th\Desktop\chatSerer\compSciClubChat\ChatAppServer\ChatAppSer
 C:\Users\haloguysm1th\Desktop\chatSerer\compSciClubChat\ChatAppServer\ChatAppServer\obj\Debug\ChatAppServer.csprojResolveAssemblyReference.cache
 C:\Users\haloguysm1th\Desktop\chatSerer\compSciClubChat\ChatAppServer\ChatAppServer\obj\Debug\ChatAppServer.exe
 C:\Users\haloguysm1th\Desktop\chatSerer\compSciClubChat\ChatAppServer\ChatAppServer\obj\Debug\ChatAppServer.pdb
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\ChatAppServer.exe.config
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\obj\Debug\ChatAppServer.exe
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\obj\Debug\ChatAppServer.pdb
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\obj\Debug\ChatAppServer.csprojResolveAssemblyReference.cache
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\ChatAppServer.exe
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\ChatAppServer.pdb
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\EntityFramework.dll
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\System.Data.SQLite.dll
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\System.Data.SQLite.EF6.dll
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\System.Data.SQLite.Linq.dll
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\EntityFramework.xml
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\haloguysm1th\Desktop\compSciClubChat\ChatAppServer\ChatAppServer\bin\Debug\System.Data.SQLite.xml
