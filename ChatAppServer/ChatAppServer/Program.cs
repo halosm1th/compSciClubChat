@@ -12,9 +12,10 @@ namespace ChatAppServer
         //These variables I want to be able to accesss no mater what, so it is helpful to have them global.
 
         //Networking data
-        public static int port;//The port on which the client connects
+        public static int port = 4000;//The port on which the client connects
         public static string adress = "0.0.0.0";//allow any ipadress to connect
         public static IPAddress ipadress = IPAddress.Parse(adress);
+        public static bool run = true;
 
         //Message data
         public static string sender;
@@ -28,7 +29,6 @@ namespace ChatAppServer
             
             string sql;
             SQLiteCommand command;
-            bool run = true;
 
             Console.WriteLine("Starting server!");//Declare that the sever is started
             if (!File.Exists("userData.sqlite"))//If the database exists
@@ -55,7 +55,7 @@ namespace ChatAppServer
                 Success("The database was found!");
                 Console.WriteLine("Booting database.");
                 try {
-                    m_dbConnection = new SQLiteConnection("Data Source=userData.sqlite;Version=3;");
+                    m_dbConnection = new SQLiteConnection("Data Source=userData.sqlite;Version=3;");//Connect and open the database
                     m_dbConnection.Open();
                     Success("Database was opened!");
                 }
@@ -65,7 +65,7 @@ namespace ChatAppServer
                 }
                 
             }
-            //Runt he program for ever!
+            
             Console.WriteLine("Trying to create activeUsersTable!");
             try {
                 sql = "CREATE TABLE ActiveUsers (id INT, username VARCHAR(1000), password VARCHAR(1000));";//Create a new table for active users
@@ -87,7 +87,6 @@ namespace ChatAppServer
 
         public static bool ControlConsole()
         {
-            bool run = true;
             Thread thread = new Thread(new ThreadStart(networking));
             thread.Start();
             string input;
@@ -95,6 +94,10 @@ namespace ChatAppServer
             SQLiteCommand command;
             while (run == true)
             {
+                if (!thread.IsAlive)
+                {
+                    thread.Start();
+                }
                 Console.Write(">> ");
                 input = Console.ReadLine();
                 if (input == "exit")
@@ -104,7 +107,14 @@ namespace ChatAppServer
                     try
                     {
                         Console.WriteLine("Shutting down messaging!");
-                        thread.Abort();
+                        try {
+                            thread.Suspend();
+                        }
+                        catch
+                        {
+
+                        }
+                        //thread.Abort();
                         Success("Messaging down.");
                         Console.WriteLine("Deleting active users");
                         sql = "DROP TABLE ActiveUsers;";
@@ -124,13 +134,35 @@ namespace ChatAppServer
                         Error("There was an error: " + e);
                     }
                 }
+
             }
             return run;
         }
 
         public static void networking()
         {
-
+            while (run == true) {
+                try
+                {
+                    Console.WriteLine("Someone can connect to the server again!");
+                    Console.Write(">> ");
+                    var tcpListener = new TcpListener(ipadress, port);
+                    tcpListener.Start();
+                    Socket socket = tcpListener.AcceptSocket();
+                    Success("Someone has conencted! Their ip is: " + socket.RemoteEndPoint);
+                    Console.WriteLine("Crating network stream with target.");
+                    Console.Write(">> ");
+                    var networkStream = new NetworkStream(socket);
+                    Success("Network stream created");
+                    Console.Write(">> ");
+                    networkStream.Close();
+                    tcpListener.Stop();
+                }
+                catch (Exception e)
+                {
+                    Error("There was an error: " + e);
+                }
+        }
         }
 
         public static void Error(string message)
