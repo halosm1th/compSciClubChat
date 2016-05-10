@@ -1,199 +1,149 @@
 using System;
-//These 3 imports are for networking
-using System.Net.Sockets;
 using System.Net;
 using System.IO;
+using System.Net.Sockets;
 using System.Data.SQLite;
-/*
- *This is the main part of the chat program. It is where we start the application and get the basics of the network set up. 
- */
+using System.Threading;
 
 namespace ChatAppServer
 {
-    class Program
+    public class Program
     {
+        //These variables I want to be able to accesss no mater what, so it is helpful to have them global.
+
+        //Networking data
         public static int port;//The port on which the client connects
         public static string adress = "0.0.0.0";//allow any ipadress to connect
         public static IPAddress ipadress = IPAddress.Parse(adress);
+
+        //Message data
         public static string sender;
         public static string reciver;
         public static string message;
+        public static SQLiteConnection m_dbConnection; //The database connection
 
-
-        /*
-         * this is the intro method for the program, we set up some basic information, and then head over to connect.
-         */
-
-
+        //Main method
         static void Main(string[] args)
         {
-            SQLiteConnection m_dbConnection;
-            SQLiteConnection m_dbConnection2;
+            
+            string sql;
+            SQLiteCommand command;
+            bool run = true;
 
-            Console.WriteLine("Checking if database exists");
-            if (!File.Exists("users.sqlite"))//Check to see if the database exists
+            Console.WriteLine("Starting server!");//Declare that the sever is started
+            if (!File.Exists("userData.sqlite"))//If the database exists
             {
-                Console.WriteLine("Error, no database found, creating a new one.");
-                SQLiteConnection.CreateFile("users.sqlite");//Create the user database
+                Error("Error: no database file found! Generating new database.");
+                try
+                {
+                    SQLiteConnection.CreateFile("userData.sqlite");//Create and connect to a database;
+                    m_dbConnection = new SQLiteConnection("Data Source=userData.sqlite;Version=3;");
+                    m_dbConnection.Open();
 
-                m_dbConnection = new SQLiteConnection("Data Source=users.sqlite;Version=3;");
-                m_dbConnection.Open();//Connect to said database
-
-                string sql = "CREATE TABLE users (id INT, username VARCHAR(100), password VARCHAR(100));";
-                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
-                command.ExecuteNonQuery();//Create the table for it
-
-                Console.WriteLine("Database created");
-
-                Console.WriteLine("Creating active users database");//Crate active users
-                SQLiteConnection.CreateFile("activeUsers.sqlite");
-
-                m_dbConnection2 = new SQLiteConnection("Data Source=activeUsers.sqlite;Version=3;");//Connect to it
-                m_dbConnection2.Open();
-
-                sql = "CREATE TABLE users (id INT, username VARCHAR(100), ip VARCHAR(12));";//Create a table for it
-                command = new SQLiteCommand(sql, m_dbConnection2);
+                    sql = "CREATE TABLE users (id INT, username VARCHAR(100), password VARCHAR(100));";//Create a new table in the database for users
+                    command = new SQLiteCommand(sql, m_dbConnection);
+                    command.ExecuteNonQuery();//Create the table for it
+                    Success("Database created!");
+                }
+                catch (Exception e)
+                {
+                    Error("There was an error: " + e);
+                }
+            }
+            else//If it does exist, do this
+            {
+                Success("The database was found!");
+                Console.WriteLine("Booting database.");
+                try {
+                    m_dbConnection = new SQLiteConnection("Data Source=userData.sqlite;Version=3;");
+                    m_dbConnection.Open();
+                    Success("Database was opened!");
+                }
+                catch(Exception e)
+                {
+                    Error("There was an error: " + e);
+                }
+                
+            }
+            //Runt he program for ever!
+            Console.WriteLine("Trying to create activeUsersTable!");
+            try {
+                sql = "CREATE TABLE ActiveUsers (id INT, username VARCHAR(1000), password VARCHAR(1000));";//Create a new table for active users
+                command = new SQLiteCommand(sql, m_dbConnection);
                 command.ExecuteNonQuery();
-
-                
-            }
-            else
-            {
-                Console.WriteLine("Database found.");//Open hte database
-                m_dbConnection = new SQLiteConnection("Data Source=users.sqlite;Version=3;");
-                m_dbConnection.Open();
-
-                m_dbConnection2 = new SQLiteConnection("Data Source=activeUsers.sqlite;Version=3;");
-                m_dbConnection2.Open();
-            }
-            Console.Write("Enter a port to start on: ");//Get the port to run on
-            port = Convert.ToInt32(Console.ReadLine());
-            while (true)//run forver
-            {
-                connect(m_dbConnection, m_dbConnection2);
-            }
-        }
-
-        /*
-         * This is used when ever someone connects to the server
-         */
-        public static void connect(SQLiteConnection db1, SQLiteConnection db2)
-        {
-            try//Simple try catch block
-            {
-                var tcpLister = new TcpListener(ipadress, port);//Create a listen for connections
-                tcpLister.Start();//Start the listener
-                Socket socket = tcpLister.AcceptSocket();//Create anew socket when the listen is connected to
-                Console.WriteLine("Connection started");//Write that we have a connection
-
-                var networkStream = new NetworkStream(socket);//The network stream
-                string ip = Convert.ToString(socket.RemoteEndPoint);//get the ipadress
-                
-                getData(networkStream, ip, db1, db2);
-
-                networkStream.Close();
-                tcpLister.Stop();
+                Success("Active users table created!");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                Console.ReadKey();
-                Console.Clear();
+                Error("There was an error: " + e);
             }
-        }
 
-
-        //this method collects data from the network
-        public static void getData(NetworkStream networkStream, string ip, SQLiteConnection db1, SQLiteConnection db2)
-        {
-            var streamReader = new StreamReader(networkStream);
-            var streamWriter = new StreamWriter(networkStream);
-            string line = "l|l";
-            writeData("it worked!", streamWriter);
-            writeData("1", streamWriter);
-            string message = streamReader.ReadLine();
-           if (message == "1")
+            while (run == true)
             {
-                writeData("username: ", streamWriter);
-                string username = streamReader.ReadLine();
-                writeData("password: ", streamWriter);
-                string password = streamReader.ReadLine();
-                string sqlCommand = ("SELECT * FROM users WHERE username ='" + username + "' and password ='" + password+"';");
-                SQLiteCommand command = new SQLiteCommand(sqlCommand, db1);
-                SQLiteDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    line = reader["username"] + "|" + reader["password"];
-                }
-                string[] split = line.Split('|');
-                if (split[0] != "l" && split[1] != "l")
-                {
-                    string type = streamReader.ReadLine();
-
-                    streamWriter.WriteLine("0");
-
-
-                    if (type == "1")
-                    {
-                        getMessage(streamReader);
-                    }
-                    else if (type == "2")
-                    {
-                        sendMessage(streamWriter);
-                    }
-
-                }
-                else
-                {
-                    Console.WriteLine("Someone tried to log in as " + username + " But failed!");
-                }
+                run = ControlConsole();
             }
-            else if (message == "2")
+            Environment.Exit(1);
+        }
+
+        public static bool ControlConsole()
+        {
+            bool run = true;
+            Thread thread = new Thread(new ThreadStart(networking));
+            thread.Start();
+            string input;
+            string sql;
+            SQLiteCommand command;
+            while (run == true)
             {
-                writeData("0", streamWriter);
-                Console.WriteLine("Creating new user");
-                Random random = new Random();
-                writeData("username: ", streamWriter);
-                string username = streamReader.ReadLine();
-                Console.WriteLine("Username: " + username);
-                writeData("password: ", streamWriter);
-                string password = streamReader.ReadLine();
-                Console.WriteLine("password: " + password);
-                int id = random.Next(0, int.MaxValue /4);
-                Console.WriteLine("ID: " + id);
-                string sqlcommand = ("INSERT INTO users (id, username, password) values (" + id + ", '" + username + "','" + password + "');");
-                SQLiteCommand command = new SQLiteCommand(sqlcommand, db1);
-                command.ExecuteNonQuery();
+                Console.Write(">> ");
+                input = Console.ReadLine();
+                if (input == "exit")
+                {
 
-                Console.WriteLine("insterted data");
+                    Console.WriteLine("Shutting down server!");
+                    try
+                    {
+                        Console.WriteLine("Shutting down messaging!");
+                        thread.Abort();
+                        Success("Messaging down.");
+                        Console.WriteLine("Deleting active users");
+                        sql = "DROP TABLE ActiveUsers;";
+                        command = new SQLiteCommand(sql, m_dbConnection);
+                        command.ExecuteNonQuery();
+                        Success("Active users dropped");
+                        Console.WriteLine("Shutting database down");
+                        m_dbConnection.Close();
+                        Success("Database Down");
+                        Console.WriteLine("Press any key to exit server...");
+                        Console.ReadKey();
+                        run = false;
+
+                    }
+                    catch (Exception e)
+                    {
+                        Error("There was an error: " + e);
+                    }
+                }
             }
-
-            streamReader.Close();
-            streamWriter.Close();
-
+            return run;
         }
 
-        //gets message from client
-        public static void getMessage(StreamReader streamReader)
+        public static void networking()
         {
 
-            sender = streamReader.ReadLine();
-            reciver = streamReader.ReadLine();
-            message = streamReader.ReadLine();
-            Console.WriteLine(sender + " sent a message to: " + reciver + " at" + DateTime.Now);
-
         }
 
-        //sends message to client
-        public static void sendMessage(StreamWriter streamWriter)
+        public static void Error(string message)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(message);
+            Console.ForegroundColor = ConsoleColor.White;
         }
-
-        public static void writeData(string message, StreamWriter streamWriter)
-       {
-            streamWriter.WriteLine(message);
-            streamWriter.Flush();
+        public static void Success(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(message);
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }
-
