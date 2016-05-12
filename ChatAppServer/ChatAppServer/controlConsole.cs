@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 using System.Threading;
 
 namespace ChatAppServer
@@ -12,7 +12,7 @@ namespace ChatAppServer
             thread.Start();
             string input;
             string sql;
-            SQLiteCommand command;
+            SqliteCommand command;
             while (chatApp.run == true)
             {
                 if (!thread.IsAlive)
@@ -40,7 +40,7 @@ namespace ChatAppServer
                         otherStuff.Success("Messaging down.");
                         Console.WriteLine("Deleting active users");
                         sql = "DROP TABLE ActiveUsers;";
-                        command = new SQLiteCommand(sql, chatApp.m_dbConnection);
+                        command = new SqliteCommand(sql, chatApp.m_dbConnection);
                         command.ExecuteNonQuery();
                         otherStuff.Success("Active users dropped");
                         Console.WriteLine("Shutting database down");

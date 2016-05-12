@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.IO;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 
 namespace ChatAppServer
 {
@@ -12,19 +12,32 @@ namespace ChatAppServer
         public static void Networking()
         {
             TcpListener tcpListener = new TcpListener(IPAddress.Any, 4000);
+            
             TcpClient tcpClient = default(TcpClient);
+            
             tcpListener.Start();
+            
             int counter = 0;
+            Thread thread = new Thread(reciveData);
             while (chatApp.run == true)
             {
                 counter++;
                 try
                 {
+                    if (!thread.IsAlive)
+                    {
+                        thread.Start();
+                    }
+                    
                     tcpClient = tcpListener.AcceptTcpClient();
+                    
+                    Console.WriteLine("test");
+                    
                     handleClient client = new handleClient();
                     Console.WriteLine("someone connected @ " + ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString());
                     Console.Write(">> ");
                     client.startClient(tcpClient, counter);
+                    
                 }
                 catch (Exception e)
                 {
@@ -32,7 +45,24 @@ namespace ChatAppServer
                 }
             }
         }
+        public static void reciveData()
+        {
+            int counter = 0;
+            handleClient client = new handleClient();
+            TcpListener tcpListener2 = new TcpListener(IPAddress.Any, 4001);
+            TcpClient tcpClient2 = default(TcpClient);
+            tcpListener2.Start();
+            while (true) {
+                counter++;
+                tcpClient2 = tcpListener2.AcceptTcpClient();
+                client.startClient(tcpClient2, counter);
+                Console.WriteLine("someone connected @ " + ((IPEndPoint)tcpClient2.Client.RemoteEndPoint).Address.ToString());
+                Console.Write(">> ");
+            }
+        }
+
     }
+
 
     public class handleClient{
         TcpClient client;
@@ -96,7 +126,7 @@ namespace ChatAppServer
         public static void activeUsers()
         {
             string sqlStatement = "INSERT INTO ActiveUsers (id, username, ip) VALUES (@id, @username, @ip)";
-            SQLiteCommand command = new SQLiteCommand(sqlStatement, chatApp.m_dbConnection);
+            SqliteCommand command = new SqliteCommand(sqlStatement, chatApp.m_dbConnection);
             command.Parameters.AddWithValue("@id", id);
             command.Parameters.AddWithValue("@username", username);
             command.Parameters.AddWithValue("@ip", ip);
@@ -114,10 +144,10 @@ namespace ChatAppServer
 
                 password = streamReader.ReadLine();
                 string sqlStatement = "SELECT * FROM users WHERE username = @username AND password = @password;";
-                SQLiteCommand command = new SQLiteCommand(sqlStatement, chatApp.m_dbConnection);
+                SqliteCommand command = new SqliteCommand(sqlStatement, chatApp.m_dbConnection);
                 command.Parameters.AddWithValue("@username", username);
                 command.Parameters.AddWithValue("@password", password);
-                SQLiteDataReader reader = command.ExecuteReader();
+                SqliteDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
                     line = reader["username"] + "|" + reader["password"] + "|" + reader["id"];
@@ -168,40 +198,71 @@ namespace ChatAppServer
 
         public static void register(StreamReader streamreader, StreamWriter streamWriter)
         {
-            string line = "l";
-            int id = 0;
-            Random random = new Random();
-            username = streamreader.ReadLine();
-            Console.WriteLine("The new users name is: " + username);
-            string password = streamreader.ReadLine();
-            string sqlStatement = "SELECT * FROM users WHERE username=@username;";
-            SQLiteCommand command = new SQLiteCommand(sqlStatement, chatApp.m_dbConnection);
-            command.Parameters.AddWithValue("@username", username);
-            SQLiteDataReader reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                line = Convert.ToString(reader["username"]);
-            }
-            if (line == username)
-            {
-                streamWriter.WriteLine("error username is taken");
-                streamWriter.Flush();
-                otherStuff.error("Some already has that name");
-            }
-            else
-            {
-                sqlStatement = "INSERT INTO users (id, username, password) values (@id, @username,@password);";
-                id = random.Next(1, int.MaxValue / 2);
-                command = new SQLiteCommand(sqlStatement, chatApp.m_dbConnection);
+            try {
+                string line = "l";
+                int id = 0;
+                Random random = new Random();
+                username = streamreader.ReadLine();
+                Console.WriteLine("The new users name is: " + username);
+                string password = streamreader.ReadLine();
+                string sqlStatement = "SELECT * FROM users WHERE username=@username;";
+                SqliteCommand command = new SqliteCommand(sqlStatement, chatApp.m_dbConnection);
                 command.Parameters.AddWithValue("@username", username);
-                command.Parameters.AddWithValue("@password", password);
-                command.Parameters.AddWithValue("@id", id);
-                command.ExecuteNonQuery();
-                streamWriter.Close();
-                streamreader.Close();
-                otherStuff.Success("Someone has added the user: " + username);
-            }
+                SqliteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    line = Convert.ToString(reader["username"]);
+                }
+                if (line == username)
+                {
+                    streamWriter.WriteLine("error username is taken");
+                    streamWriter.Flush();
+                    otherStuff.error("Some already has that name");
+                }
+                else
+                {
+                    sqlStatement = "SELECT * FROM users WHERE id=@id;";
+                    line = "1";
+                    id = random.Next(1000, int.MaxValue);
+                    command = new SqliteCommand(sqlStatement, chatApp.m_dbConnection);
+                    command.Parameters.AddWithValue("@id", id);
+                    reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        try {
+                            line = Convert.ToString(reader["id"]);
+                        }catch(Exception e)
+                        {
+                            Console.WriteLine("There was an error on" + reader["id"]);
+                        }
+                    }
+                    while (id == Convert.ToInt32(line))
+                    {
+                        id = random.Next(1000, int.MaxValue);
+                        command = new SqliteCommand(sqlStatement, chatApp.m_dbConnection);
+                        command.Parameters.AddWithValue("@id", id);
+                        reader = command.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            line = Convert.ToString(reader["id"]);
+                        }
+                    }
 
+                    sqlStatement = "INSERT INTO users (id, username, password) values (@id, @username,@password);";
+                    command = new SqliteCommand(sqlStatement, chatApp.m_dbConnection);
+                    command.Parameters.AddWithValue("@username", username);
+                    command.Parameters.AddWithValue("@password", password);
+                    command.Parameters.AddWithValue("@id", id);
+                    command.ExecuteNonQuery();
+                    streamWriter.Close();
+                    streamreader.Close();
+                    otherStuff.Success("Someone has added the user: " + username + " with the id: " + id);
+                    Console.WriteLine(">> ");
+                }
+            }catch(Exception e)
+            {
+                otherStuff.error(Convert.ToString (e));
+            }
         }
 
     }
