@@ -113,6 +113,7 @@ namespace ChatAppServer
                      }
                     streamWriter.WriteLine(lostLines.Length);
                     streamWriter.Flush();
+                    Console.WriteLine(lostLines.Length);
                     otherStuff.Success("I made it to the fourth check!");
                      for (int i = 0; i < lostLines.Length; i++)
                      {

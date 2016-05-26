@@ -90,7 +90,7 @@ namespace ChatAppServer
                 {
                     Console.WriteLine("Someone has chosen to log in");
                     Console.Write(">> ");
-                    streamWriter.WriteLine("You have chosen login!");
+                    
                     streamWriter.Flush();
                     if (login(streamReader, streamWriter) != true)
                     {
@@ -112,7 +112,7 @@ namespace ChatAppServer
                 {
                     Console.WriteLine("Someone has chosen to register!");
                     Console.Write(">> ");
-                    streamWriter.WriteLine("You have chosen Register!");
+                    
                     streamWriter.Flush();
                     register(streamReader, streamWriter);
                 }

@@ -1,0 +1,120 @@
+using System;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+
+namespace Chatcleint
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int port = 4000;
+            string ipAdress = "127.0.0.1";
+            Random random = new Random();
+            string username = "";
+            string password = "";
+            string input;
+            string userid;
+            string chatid;
+
+            try
+            {
+                int i = 0;
+                while (i < 10000)
+                {
+                    TcpClient socketforserver = new TcpClient(ipAdress, port);
+                    NetworkStream networkStream = socketforserver.GetStream(); //Create a new network stream
+                    var streamWrite = new System.IO.StreamWriter(networkStream); //Create a way to write to the stream
+                    var streamReader = new System.IO.StreamReader(networkStream);
+                    Console.WriteLine("Login or Register (l),(r)");
+                    input = Console.ReadLine();
+                    if (input == "l")
+                    {
+                        streamWrite.WriteLine("login");
+                        streamWrite.Flush();
+                        Console.Write("username: ");
+                        username = Console.ReadLine();
+                        streamWrite.WriteLine(username);
+                        streamWrite.Flush();
+                        Console.Write("password: ");
+                        password = ReadPassword();
+                        streamWrite.WriteLine(password);
+                        streamWrite.Flush();
+                        Console.Write("Get messages or send (G,S): ");
+                        input = Console.ReadLine();
+                        if(input == "G"){
+                            Console.WriteLine("geting messages!");
+                            streamWrite.WriteLine("recieve");
+                            streamWrite.Flush();
+                            streamWrite.WriteLine("TSMIKDTJYMK");
+                            streamWrite.Flush();
+                            streamWrite.WriteLine("1");
+                            streamWrite.Flush();
+                            streamWrite.WriteLine("1");
+                            streamWrite.Flush();
+                            streamWrite.WriteLine("1|hi|1");
+                            streamWrite.Flush();
+                            Console.WriteLine(streamReader.ReadLine());
+
+                            Console.ReadKey();
+                            int temp = 0;
+                            for(int b = 0; b < temp; b++){
+                                Console.WriteLine(streamReader.ReadLine());
+                            }
+                                Console.ReadKey();
+                        }else if (input == "S"){
+
+                        }else{
+                            
+                        }
+                    }
+                    else if (input == "r")
+                    {
+
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Console.ReadKey();
+            }
+        }
+
+        public static string ReadPassword()
+        {
+            string password = "";
+            ConsoleKeyInfo info = Console.ReadKey(true);
+            while (info.Key != ConsoleKey.Enter)
+            {
+                if (info.Key != ConsoleKey.Backspace)
+                {
+                    Console.Write("*");
+                    password += info.KeyChar;
+                }
+                else if (info.Key == ConsoleKey.Backspace)
+                {
+                    if (!string.IsNullOrEmpty(password))
+                    {
+                        // remove one character from the list of password characters
+                        password = password.Substring(0, password.Length - 1);
+                        // get the location of the cursor
+                        int pos = Console.CursorLeft;
+                        // move the cursor to the left by one character
+                        Console.SetCursorPosition(pos - 1, Console.CursorTop);
+                        // replace it with space
+                        Console.Write(" ");
+                        // move the cursor to the left by one character again
+                        Console.SetCursorPosition(pos - 1, Console.CursorTop);
+                    }
+                }
+                info = Console.ReadKey(true);
+            }
+            // add a new line because user pressed enter at the end of their password
+            Console.WriteLine();
+            return password;
+        }
+    }
+}
