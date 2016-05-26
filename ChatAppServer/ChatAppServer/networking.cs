@@ -193,6 +193,7 @@ namespace ChatAppServer
                 {
                     Console.WriteLine(username + " logged in to get their message('s)");
                     Console.WriteLine(">> ");
+                    Messages.GetMessage(streamReader, streamWriter);
                 }
                 else
                 {

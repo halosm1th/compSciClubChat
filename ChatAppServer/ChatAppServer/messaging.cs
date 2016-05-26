@@ -3,6 +3,7 @@ using System.Net;
 using System.IO;
 using System.Net.Sockets;
 using Mono.Data.Sqlite;
+using System.Linq;
 
 namespace ChatAppServer
 {
@@ -57,9 +58,64 @@ namespace ChatAppServer
            
         }
 
-        public static void GetMessage()
+        public static void GetMessage(StreamReader streamReader,StreamWriter streamWriter)
         {
-
+            string chatID;
+            string userID;
+            string timestamp;
+            string message;
+            string lastline;
+            string[] temp;
+            string[] file;
+            string dir;
+            string[] lostLines;
+            int anotherint = 0;
+            int tempInt = 0;
+            chatID = streamReader.ReadLine();
+            userID = streamReader.ReadLine();
+            timestamp = streamReader.ReadLine();
+            message = streamReader.ReadLine();
+            dir  = Directory.GetCurrentDirectory() + @"/" + chatID + ".txt";
+            if (!File.Exists(dir))
+            {
+                streamWriter.WriteLine("Error no file found!");
+                streamWriter.Flush();
+            }
+            else
+            {
+                lastline = File.ReadLines(dir).Last();
+                temp = lastline.Split('|');
+                if (temp[2] == timestamp)
+                {
+                    streamWriter.WriteLine("No new messages");
+                    streamWriter.Flush();
+                }
+                else
+                {
+                    StreamReader fileReader = new StreamReader(dir);//new file reader
+                    file = new string[File.ReadLines(dir).Count()];//Create an array for the file.
+                    for (int i = 0; i < file.Length; i++)//load the file into memory
+                    {
+                        file[i] = fileReader.ReadLine();
+                    }
+                    fileReader.Close();//stop reading the flie
+                    while (file[tempInt] != message)//get the linenumber that we loose messages on.
+                    {
+                        tempInt++;
+                    }
+                    lostLines = new string[file.Length - tempInt];
+                     for(int i = tempInt; i < file.Length; i++){//load the unused lines into ram
+                         lostLines[anotherint] = file[i];
+                     }
+                    streamWriter.WriteLine(lostLines.Length);
+                    streamWriter.Flush();
+                     for (int i = 0; i < lostLines.Length; i++)
+                     {
+                         streamWriter.WriteLine(lostLines[i]);
+                         streamWriter.Flush();
+                     }
+                }
+            }
         }
 
         public static void registerSession(string id, string username, string username2)
