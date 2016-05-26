@@ -94,23 +94,29 @@ namespace ChatAppServer
                 {
                     StreamReader fileReader = new StreamReader(dir);//new file reader
                     file = new string[File.ReadLines(dir).Count()];//Create an array for the file.
+                    otherStuff.Success("I made it to the first check!");
                     for (int i = 0; i < file.Length; i++)//load the file into memory
                     {
                         file[i] = fileReader.ReadLine();
                     }
                     fileReader.Close();//stop reading the flie
+                    otherStuff.Success("I made it to the second check!");
                     while (file[tempInt] != message)//get the linenumber that we loose messages on.
                     {
                         tempInt++;
                     }
                     lostLines = new string[file.Length - tempInt];
+                    otherStuff.Success("I made it to the third check!");
                      for(int i = tempInt; i < file.Length; i++){//load the unused lines into ram
+                         otherStuff.Success("loaded: " + i);
                          lostLines[anotherint] = file[i];
                      }
                     streamWriter.WriteLine(lostLines.Length);
                     streamWriter.Flush();
+                    otherStuff.Success("I made it to the fourth check!");
                      for (int i = 0; i < lostLines.Length; i++)
                      {
+                         otherStuff.Success("Sent: " + i);
                          streamWriter.WriteLine(lostLines[i]);
                          streamWriter.Flush();
                      }
