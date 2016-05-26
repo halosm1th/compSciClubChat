@@ -25,13 +25,14 @@ namespace ChatAppServer
         {
             string sql;
             SqliteCommand command;
-            Console.WriteLine("Starting server!");
+            Console.WriteLine("Starting server 1 !");
 
             try
             {
                 Console.WriteLine("Checking for database.");
                 if (!File.Exists("userData.sqlite"))
                 {
+                    otherStuff.error("No database found! creating a new one!");
                     SqliteConnection.CreateFile("userData.sqlite");//Create and connect to a database;
                     m_dbConnection = new SqliteConnection("Data Source=userData.sqlite;Version=3;");
                     m_dbConnection.Open();
@@ -40,6 +41,10 @@ namespace ChatAppServer
                     command = new SqliteCommand(sql, m_dbConnection);
                     command.ExecuteNonQuery();//Create the table for it
                     otherStuff.Success("Database created!");
+                    sql = "CREATE TABLE activeSession (Sessionid VARCAHR(1000), usernameOne VARCHAR(1000), usernameTwo VARCAHR(1000));";
+                    command = new SqliteCommand(sql, m_dbConnection);
+                    command.ExecuteNonQuery();
+                    otherStuff.Success("Active session Table created!");
                 }
                 else
                 {
@@ -56,13 +61,14 @@ namespace ChatAppServer
                         otherStuff.error("There was an error: " + e);
                     }
                 }
-                Console.WriteLine("Trying to create activeUsersTable!");
+                Console.WriteLine("Trying to create activeUsersTable ");
                 try
                 {
                     sql = "CREATE TABLE ActiveUsers (id INT, username VARCHAR(1000), ip VARCHAR(12));";//Create a new table for active users
                     command = new SqliteCommand(sql, m_dbConnection);
                     command.ExecuteNonQuery();
                     otherStuff.Success("Active users table created!");
+                    
                 }
                 catch (Exception e)
                 {

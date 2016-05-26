@@ -99,7 +99,12 @@ namespace ChatAppServer
                     }
                     else {
                         activeUsers();
+
                         understand(streamReader, streamWriter);
+                        streamWriter.Close();
+                        streamReader.Close();
+                        networkStream.Close();
+                       
                     }
 
                 }
@@ -174,26 +179,28 @@ namespace ChatAppServer
 
         public static void understand(StreamReader streamReader, StreamWriter streamWriter)
         {
+            
             Console.WriteLine(username + " has logged in, determining function...");
             Console.Write(">> ");
-            string input = streamReader.ReadLine();
-            if (input == "send")
-            {
-                Console.WriteLine(username + " is sending a message");
-                Console.Write(">> ");
-            }
-            else if (input == "recieve")
-            {
-                Console.WriteLine(username + " logged in to get their message('s)");
-                Console.WriteLine(">> ");
-            }
-            else
-            {
-                streamWriter.WriteLine("Error, incorrect data entered");
-                streamWriter.Flush();
-                Console.WriteLine("Error, incorrect data entered");
-                Console.Write(">> ");
-            }
+                string input = streamReader.ReadLine();
+                if (input == "send")
+                {
+                    Console.WriteLine(username + " is sending a message");
+                    Console.Write(">> ");
+                    Messages.SendMessage(streamReader, streamWriter);
+                }
+                else if (input == "recieve")
+                {
+                    Console.WriteLine(username + " logged in to get their message('s)");
+                    Console.WriteLine(">> ");
+                }
+                else
+                {
+                    streamWriter.WriteLine("Error, incorrect data entered");
+                    streamWriter.Flush();
+                    Console.WriteLine("Error, incorrect data entered");
+                    Console.Write(">> ");
+                }
         }
 
         public static void register(StreamReader streamreader, StreamWriter streamWriter)
@@ -233,7 +240,7 @@ namespace ChatAppServer
                             line = Convert.ToString(reader["id"]);
                         }catch(Exception e)
                         {
-                            Console.WriteLine("There was an error on" + reader["id"]);
+                            Console.WriteLine("There was an error on" + reader["id"] + " with id: " +e);
                         }
                     }
                     while (id == Convert.ToInt32(line))

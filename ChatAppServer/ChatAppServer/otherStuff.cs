@@ -13,6 +13,7 @@ namespace ChatAppServer
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(text);
             Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(">>");
         }
         public static void Success(string text)
         {
