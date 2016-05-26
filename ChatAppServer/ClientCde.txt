@@ -8,6 +8,8 @@ namespace Chatcleint
 {
     class Program
     {
+        public static NetworkStream networkStream;
+        public static bool run = true;
         static void Main(string[] args)
         {
             int port = 4000;
@@ -25,9 +27,11 @@ namespace Chatcleint
                 while (i < 10000)
                 {
                     TcpClient socketforserver = new TcpClient(ipAdress, port);
-                    NetworkStream networkStream = socketforserver.GetStream(); //Create a new network stream
+                    networkStream = socketforserver.GetStream(); //Create a new network stream
                     var streamWrite = new System.IO.StreamWriter(networkStream); //Create a way to write to the stream
                     var streamReader = new System.IO.StreamReader(networkStream);
+                    Thread thread = new Thread(networklistener);
+                    thread.Start();
                     Console.WriteLine("Login or Register (l),(r)");
                     input = Console.ReadLine();
                     if (input == "l")
@@ -56,14 +60,13 @@ namespace Chatcleint
                             streamWrite.Flush();
                             streamWrite.WriteLine("1|hi|1");
                             streamWrite.Flush();
-                            Console.WriteLine(streamReader.ReadLine());
-
-                            Console.ReadKey();
-                            int temp = 0;
+                            string text = streamReader.ReadLine();
+                            int temp = Convert.ToInt32 (text);
                             for(int b = 0; b < temp; b++){
                                 Console.WriteLine(streamReader.ReadLine());
                             }
                                 Console.ReadKey();
+                                run = false;
                         }else if (input == "S"){
 
                         }else{
@@ -115,6 +118,15 @@ namespace Chatcleint
             // add a new line because user pressed enter at the end of their password
             Console.WriteLine();
             return password;
+        }
+
+        public static void networklistener()
+        {
+            StreamReader streamReader = new StreamReader(networkStream);
+            while (run == true)
+            {
+                //Console.WriteLine(streamReader.ReadLine());
+            }
         }
     }
 }

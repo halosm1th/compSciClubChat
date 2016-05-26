@@ -75,6 +75,7 @@ namespace ChatAppServer
             userID = streamReader.ReadLine();
             timestamp = streamReader.ReadLine();
             message = streamReader.ReadLine();
+            streamWriter.Flush();
             dir  = Directory.GetCurrentDirectory() + @"/" + chatID + ".txt";
             if (!File.Exists(dir))
             {
