@@ -192,9 +192,13 @@ namespace ChatAppServer
                 else if (input == "recieve")
                 {
                     Console.WriteLine(username + " logged in to get their message('s)");
-                    Console.WriteLine(">> ");
+                    Console.Write(">> ");
                     Messages.GetMessage(streamReader, streamWriter);
-                }
+                }else if (input == "getChats")
+            {
+                Console.WriteLine(username + " logged in to get their current convos");
+                Console.Write(">> ");
+            }
                 else
                 {
                     streamWriter.WriteLine("Error, incorrect data entered");

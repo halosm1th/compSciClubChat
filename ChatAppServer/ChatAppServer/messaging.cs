@@ -95,31 +95,25 @@ namespace ChatAppServer
                 {
                     StreamReader fileReader = new StreamReader(dir);//new file reader
                     file = new string[File.ReadLines(dir).Count()];//Create an array for the file.
-                    otherStuff.Success("I made it to the first check!");
                     for (int i = 0; i < file.Length; i++)//load the file into memory
                     {
                         file[i] = fileReader.ReadLine();
                     }
                     fileReader.Close();//stop reading the flie
-                    otherStuff.Success("I made it to the second check!");
                     while (file[tempInt] != message)//get the linenumber that we loose messages on.
                     {
                         tempInt++;
                     }
                     lostLines = new string[file.Length - tempInt];
-                    otherStuff.Success("I made it to the third check!");
                      for(int i = tempInt; i < file.Length; i++){//load the unused lines into ram
-                         otherStuff.Success("loaded: " + i);
                          lostLines[anotherint] = file[i];
                          anotherint++;
                      }
                     streamWriter.WriteLine(lostLines.Length);
                     streamWriter.Flush();
                     Console.WriteLine(lostLines.Length);
-                    otherStuff.Success("I made it to the fourth check!");
                      for (int i = 0; i < lostLines.Length; i++)
                      {
-                         otherStuff.Success(lostLines[i]);
                          streamWriter.WriteLine(lostLines[i]);
                          streamWriter.Flush();
                      }
@@ -136,7 +130,7 @@ namespace ChatAppServer
             sqlcommand.Parameters.AddWithValue("@username2", username2);
             sqlcommand.ExecuteNonQuery();
 	    Console.WriteLine("The directory is: " + Directory.GetCurrentDirectory());
-            File.Create(Directory.GetCurrentDirectory()+@"/"+id+".txt");
+            File.WriteAllText(Directory.GetCurrentDirectory()+@"/"+id+".txt","");
 
         }
 
@@ -153,6 +147,35 @@ namespace ChatAppServer
             }
 
             return run;
+        }
+
+        public static void checkMessages(StreamReader streamReader, StreamWriter streamWriter, string username)
+        {
+            string[] chatsTemp = new string[1000];
+            string[] chat;
+            int i = 0;
+            string command = "SELECT * FROM activeSessions WHERE usernameOne = @username OR usernameTwo = @username";
+            SqliteCommand sqlitecommand = new SqliteCommand(command, chatApp.m_dbConnection);
+            sqlitecommand.Parameters.AddWithValue("@username", username);
+            SqliteDataReader reader = sqlitecommand.ExecuteReader();
+            while (reader.Read())
+            {
+                chatsTemp[i] = Convert.ToString (reader["Sessionid"]);
+                i++;
+            }
+            chat = new string[chatsTemp.Length];
+            for(int b = 0; b  < chat.Length; b++)
+            {
+                chat[b] = chatsTemp[i];
+            }
+
+            streamWriter.WriteLine(chat.Length);
+            streamWriter.Flush();
+            for (int b = 0; b < chat.Length; b++)
+            {
+                streamWriter.WriteLine(chat[b]);
+                streamWriter.Flush();
+            }
         }
     }
 }
