@@ -1,3 +1,0 @@
-1|hi|1
-1|Sup!|2
-1|I know that this is slow and old but it works!|3
