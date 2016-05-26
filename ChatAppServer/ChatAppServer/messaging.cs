@@ -23,7 +23,8 @@ namespace ChatAppServer
             {
                 sessionID = streamReader.ReadLine();
                 input = streamReader.ReadLine();
-                File.AppendAllText(sessionID, input);
+		
+                File.AppendAllText(Directory.GetCurrentDirectory()+@"/"+sessionID+".txt", input+Environment.NewLine);
             }
         }
 
@@ -69,7 +70,8 @@ namespace ChatAppServer
             sqlcommand.Parameters.AddWithValue("@username",username);
             sqlcommand.Parameters.AddWithValue("@username2", username2);
             sqlcommand.ExecuteNonQuery();
-            File.Create(Directory.GetCurrentDirectory()+@"\"+id);
+	    Console.WriteLine("The directory is: " + Directory.GetCurrentDirectory());
+            File.Create(Directory.GetCurrentDirectory()+@"/"+id+".txt");
 
         }
 
