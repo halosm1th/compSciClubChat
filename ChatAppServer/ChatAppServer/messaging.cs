@@ -111,6 +111,7 @@ namespace ChatAppServer
                      for(int i = tempInt; i < file.Length; i++){//load the unused lines into ram
                          otherStuff.Success("loaded: " + i);
                          lostLines[anotherint] = file[i];
+                         anotherint++;
                      }
                     streamWriter.WriteLine(lostLines.Length);
                     streamWriter.Flush();
@@ -118,7 +119,7 @@ namespace ChatAppServer
                     otherStuff.Success("I made it to the fourth check!");
                      for (int i = 0; i < lostLines.Length; i++)
                      {
-                         otherStuff.Success("Sent: " + i);
+                         otherStuff.Success(lostLines[i]);
                          streamWriter.WriteLine(lostLines[i]);
                          streamWriter.Flush();
                      }
