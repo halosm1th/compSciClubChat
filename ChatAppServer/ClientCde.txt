@@ -1,90 +1,228 @@
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.IO;
 
-namespace Chatcleint
+namespace chatClient
 {
     class Program
     {
         public static NetworkStream networkStream;
         public static bool run = true;
+        public static string username;
+        public static string password;
+        public static string userId;
+        public static string[] chatIds;
+        public static string lastMessage = "1|Hi!|1";
+        public static string lastTimeStamp = "1";
+        public static string tempIp;
+        public static int lastpose = 0;
+
         static void Main(string[] args)
         {
-            int port = 4000;
-            string ipAdress = "127.0.0.1";
-            Random random = new Random();
-            string username = "";
-            string password = "";
-            string input;
-            string userid;
-            string chatid;
-
-            try
+            
+            if(args.Length > 0)
             {
-                int i = 0;
-                while (i < 10000)
-                {
-                    TcpClient socketforserver = new TcpClient(ipAdress, port);
-                    networkStream = socketforserver.GetStream(); //Create a new network stream
-                    var streamWrite = new System.IO.StreamWriter(networkStream); //Create a way to write to the stream
-                    var streamReader = new System.IO.StreamReader(networkStream);
-                    Thread thread = new Thread(networklistener);
-                    thread.Start();
-                    Console.WriteLine("Login or Register (l),(r)");
-                    input = Console.ReadLine();
-                    if (input == "l")
-                    {
-                        streamWrite.WriteLine("login");
-                        streamWrite.Flush();
-                        Console.Write("username: ");
-                        username = Console.ReadLine();
-                        streamWrite.WriteLine(username);
-                        streamWrite.Flush();
-                        Console.Write("password: ");
-                        password = ReadPassword();
-                        streamWrite.WriteLine(password);
-                        streamWrite.Flush();
-                        Console.Write("Get messages or send (G,S): ");
-                        input = Console.ReadLine();
-                        if(input == "G"){
-                            Console.WriteLine("geting messages!");
-                            streamWrite.WriteLine("recieve");
-                            streamWrite.Flush();
-                            streamWrite.WriteLine("TSMIKDTJYMK");
-                            streamWrite.Flush();
-                            streamWrite.WriteLine("1");
-                            streamWrite.Flush();
-                            streamWrite.WriteLine("1");
-                            streamWrite.Flush();
-                            streamWrite.WriteLine("1|hi|1");
-                            streamWrite.Flush();
-                            string text = streamReader.ReadLine();
-                            int temp = Convert.ToInt32 (text);
-                            for(int b = 0; b < temp; b++){
-                                Console.WriteLine(streamReader.ReadLine());
-                            }
-                                Console.ReadKey();
-                                run = false;
-                        }else if (input == "S"){
+                tempIp = args[0];
+            }
+            else
+            {
+                tempIp = "159.203.133.74";
+            }
+            main_client(tempIp);
+        }
 
-                        }else{
-                            
+        public static void main_client(string ip) {
+            int port = 4000;
+            string input;
+            bool tempBool = false;
+            try
+            { 
+                
+                
+                    run = true;
+                    TcpClient socketforserver = new TcpClient(ip, port);
+                    networkStream = socketforserver.GetStream();
+                    StreamWriter streamWriter = new StreamWriter(networkStream);
+                    StreamReader streamReader = new StreamReader(networkStream);
+                    while (tempBool != true)
+                    {
+                        Console.Write("(L)ogin or (R)egister: ");
+                        input = Console.ReadLine().ToUpper();
+                        if (input == "R")
+                        {
+                            tempBool = register();
+                            login(streamWriter, streamReader);
+                        }
+                        else if (input == "L")
+                        {
+                            tempBool = Firstlogin();
+                        }
+                        else
+                        {
+                            Console.WriteLine("Error incorrect login. press any key to continue...");
+                            Console.ReadKey();
                         }
                     }
-                    else if (input == "r")
-                    {
+                    Console.Clear();
+                    getChats(streamReader, streamWriter);
+                Thread thread = new Thread(getData);
+                thread.Start();
+                while (true)
+                {
+                    
+                    
+                    Console.SetCursorPosition(0, Console.WindowTop + Console.WindowHeight - 1);
+                    Console.Write("Message: ");
+                    input = Console.ReadLine();
 
-                    }
+                    socketforserver = new TcpClient(ip, port);
+                    networkStream = socketforserver.GetStream();
+                    streamWriter = new StreamWriter(networkStream);
+                    streamReader = new StreamReader(networkStream);
+                    login(streamWriter, streamReader);
+                    streamWriter.WriteLine("send");
+                    streamWriter.Flush();
+                    streamWriter.WriteLine("old");
+                    streamWriter.Flush();
+                    streamWriter.WriteLine(chatIds[0]);
+                    streamWriter.Flush();
+                    string finalMessage = "1|" + input + "|" + DateTime.Now.Month + "." + DateTime.Now.Day + "." + DateTime.Now.Year + ":" + DateTime.Now.Hour + "." + DateTime.Now.Minute + "." + DateTime.Now.Second;
+                    streamWriter.WriteLine(finalMessage);
+                    streamWriter.Flush();
+                    lastMessage = finalMessage;
+                    
+                    
                 }
+
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                Console.WriteLine(e);
-                Console.ReadKey();
+                Console.WriteLine("Error: " + e);
             }
         }
+
+        public static void getChats(StreamReader streamReader, StreamWriter streamWriter)
+        {
+            streamWriter.WriteLine("getChats");
+            streamWriter.Flush();
+            string runtimes = streamReader.ReadLine();
+            int runtime = Convert.ToInt32(runtimes);
+            chatIds = new string[runtime];
+            if(chatIds.Length > 1)
+            {
+                Console.WriteLine("you are in more than 1 chat. You are going into caht #1 Sorry.");
+            }
+            for(int i = 0; i < runtime; i++)
+            {
+                chatIds[i] = streamReader.ReadLine();
+            }
+        }
+
+        public static void login(StreamWriter streamWriter, StreamReader streamReader) {
+            streamWriter.WriteLine("login");
+            streamWriter.Flush();
+            streamWriter.WriteLine(username);
+            streamWriter.Flush();
+            streamWriter.WriteLine(password);
+            streamWriter.Flush();
+          }
+
+        public static bool Firstlogin()
+        {
+            bool success = false;
+            StreamWriter streamWriter = new StreamWriter(networkStream);
+            StreamReader streamReader = new StreamReader(networkStream);
+            streamWriter.WriteLine("login");
+            Console.Write("username: ");
+            username = Console.ReadLine();
+            Console.Write("Password: ");
+            password = ReadPassword();
+            streamWriter.WriteLine(username);
+            streamWriter.Flush();
+            streamWriter.WriteLine(password);
+            streamWriter.Flush();
+            string test = streamReader.ReadLine();
+            if(test == "success")
+            {
+                success = true;
+            }
+            else
+            {
+                Console.WriteLine("Wrong useranme or password");
+            }
+            return success;
+        }
+
+        public static bool register()
+        {
+            bool success = false;
+            StreamWriter streamWriter = new StreamWriter(networkStream);
+            StreamReader streamReader = new StreamReader(networkStream);
+            streamWriter.WriteLine("register");
+            Console.Write("username: ");
+            username = Console.ReadLine();
+            Console.Write("Password: ");
+            password = ReadPassword();
+            streamWriter.WriteLine();
+            streamWriter.Flush();
+            streamWriter.WriteLine();
+            streamWriter.Flush();
+            string test = streamReader.ReadLine();
+            if (test == "success")
+            {
+                success = true;
+            }
+            else
+            {
+                Console.WriteLine("Wrong useranme or password");
+            }
+            return success;
+        }
+
+        public static void getData()
+        {
+             
+            while(run == true)
+            {
+               TcpClient socketforserver = new TcpClient(tempIp, 4000);
+                networkStream = socketforserver.GetStream();
+                string line = lastMessage;
+                string[] temp;
+                StreamWriter streamWriter = new StreamWriter(networkStream);
+                StreamReader streamReader = new StreamReader(networkStream);
+                login(streamWriter, streamReader);
+                streamWriter.WriteLine("recieve");
+                streamWriter.Flush();
+                streamWriter.WriteLine(chatIds[0]);
+                streamWriter.Flush();
+                streamWriter.WriteLine("1");
+                streamWriter.Flush();
+                streamWriter.WriteLine(lastTimeStamp);
+                streamWriter.Flush();
+                streamWriter.WriteLine(lastMessage);
+                streamWriter.Flush();
+                streamReader.ReadLine();
+                int runtimes = Convert.ToInt32 (streamReader.ReadLine());
+                Console.SetCursorPosition(0, lastpose);
+                for (int i = 0; i < runtimes; i++)
+                {
+                    line = streamReader.ReadLine();
+                    temp = line.Split('|');
+                    Console.WriteLine(temp[1]);
+                    lastpose++;
+                }
+                Console.SetCursorPosition(0, lastpose);
+                lastTimeStamp = DateTime.Now.Month + "." + DateTime.Now.Day + "." + DateTime.Now.Year+":"+DateTime.Now.Hour+"."+DateTime.Now.Minute+"."+DateTime.Now.Second;
+                lastMessage = line;
+                Console.SetCursorPosition(9, Console.WindowTop + Console.WindowHeight - 1);
+                
+                    Thread.Sleep(5000);
+               
+            }
+        }
+
 
         public static string ReadPassword()
         {
@@ -120,13 +258,5 @@ namespace Chatcleint
             return password;
         }
 
-        public static void networklistener()
-        {
-            StreamReader streamReader = new StreamReader(networkStream);
-            while (run == true)
-            {
-                //Console.WriteLine(streamReader.ReadLine());
-            }
-        }
     }
 }
