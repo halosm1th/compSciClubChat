@@ -75,7 +75,7 @@ namespace ChatAppServer
             userID = streamReader.ReadLine();
             timestamp = streamReader.ReadLine();
             message = streamReader.ReadLine();
-            streamWriter.Flush();
+            
             dir  = Directory.GetCurrentDirectory() + @"/" + chatID + ".txt";
             if (!File.Exists(dir))
             {
@@ -117,6 +117,7 @@ namespace ChatAppServer
                          streamWriter.WriteLine(lostLines[i]);
                          streamWriter.Flush();
                      }
+                     
                 }
             }
         }
@@ -154,7 +155,7 @@ namespace ChatAppServer
             string[] chatsTemp = new string[1000];
             string[] chat;
             int i = 0;
-            string command = "SELECT * FROM activeSessions WHERE usernameOne = @username OR usernameTwo = @username";
+            string command = "SELECT * FROM activeSession WHERE usernameOne = @username OR usernameTwo = @username";
             SqliteCommand sqlitecommand = new SqliteCommand(command, chatApp.m_dbConnection);
             sqlitecommand.Parameters.AddWithValue("@username", username);
             SqliteDataReader reader = sqlitecommand.ExecuteReader();
@@ -163,10 +164,10 @@ namespace ChatAppServer
                 chatsTemp[i] = Convert.ToString (reader["Sessionid"]);
                 i++;
             }
-            chat = new string[chatsTemp.Length];
+            chat = new string[chatsTemp.Count(x => x != null)];
             for(int b = 0; b  < chat.Length; b++)
             {
-                chat[b] = chatsTemp[i];
+                chat[b] = chatsTemp[b];
             }
 
             streamWriter.WriteLine(chat.Length);

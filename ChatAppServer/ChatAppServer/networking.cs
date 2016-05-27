@@ -104,6 +104,7 @@ namespace ChatAppServer
                         streamWriter.Close();
                         streamReader.Close();
                         networkStream.Close();
+                        Console.WriteLine(username + "had finsihed");
                        
                     }
 
@@ -163,9 +164,12 @@ namespace ChatAppServer
                     loginPerson = true;
                     id = split[2];
                     username = split[0];
+                    streamWriter.WriteLine("success");
+                    streamWriter.Flush();
                 }
                 else
                 {
+                    streamWriter.WriteLine("nope.jpg");
                     otherStuff.error("The user failed to login");
                 }
             }
@@ -198,6 +202,7 @@ namespace ChatAppServer
             {
                 Console.WriteLine(username + " logged in to get their current convos");
                 Console.Write(">> ");
+                Messages.checkMessages(streamReader,streamWriter, username);
             }
                 else
                 {
@@ -206,6 +211,7 @@ namespace ChatAppServer
                     Console.WriteLine("Error, incorrect data entered");
                     Console.Write(">> ");
                 }
+           
         }
 
         public static void register(StreamReader streamreader, StreamWriter streamWriter)
@@ -270,9 +276,13 @@ namespace ChatAppServer
                     streamreader.Close();
                     otherStuff.Success("Someone has added the user: " + username + " with the id: " + id);
                     Console.WriteLine(">> ");
+                    streamWriter.WriteLine("success");
+                    streamWriter.Flush();
                 }
             }catch(Exception e)
             {
+                streamWriter.WriteLine("nope.jpg");
+                streamWriter.Flush();
                 otherStuff.error(Convert.ToString (e));
             }
         }
