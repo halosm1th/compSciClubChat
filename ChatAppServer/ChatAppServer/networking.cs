@@ -166,6 +166,8 @@ namespace ChatAppServer
                     username = split[0];
                     streamWriter.WriteLine("success");
                     streamWriter.Flush();
+                    streamWriter.WriteLine(id);
+                    streamWriter.Flush();
                 }
                 else
                 {
@@ -277,6 +279,8 @@ namespace ChatAppServer
                     otherStuff.Success("Someone has added the user: " + username + " with the id: " + id);
                     Console.WriteLine(">> ");
                     streamWriter.WriteLine("success");
+                    streamWriter.Flush();
+                    streamWriter.WriteLine(id);
                     streamWriter.Flush();
                 }
             }catch(Exception e)
