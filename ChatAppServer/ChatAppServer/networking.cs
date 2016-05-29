@@ -274,14 +274,14 @@ namespace ChatAppServer
                     command.Parameters.AddWithValue("@password", password);
                     command.Parameters.AddWithValue("@id", id);
                     command.ExecuteNonQuery();
-                    streamWriter.Close();
-                    streamreader.Close();
                     otherStuff.Success("Someone has added the user: " + username + " with the id: " + id);
                     Console.WriteLine(">> ");
                     streamWriter.WriteLine("success");
                     streamWriter.Flush();
                     streamWriter.WriteLine(id);
                     streamWriter.Flush();
+                    streamWriter.Close();
+                    streamreader.Close();
                 }
             }catch(Exception e)
             {
