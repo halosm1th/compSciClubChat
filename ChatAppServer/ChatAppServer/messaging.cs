@@ -9,6 +9,7 @@ namespace ChatAppServer
 {
     public class Messages
     {
+        public static string LASTLINE;
         public static void SendMessage(StreamReader streamReader, StreamWriter streamWriter)
         {
             
@@ -67,6 +68,7 @@ namespace ChatAppServer
             string lastline;
             string[] temp;
             string[] file;
+            
             string dir;
             string[] lostLines;
             int anotherint = 0;
@@ -93,31 +95,43 @@ namespace ChatAppServer
                 }
                 else
                 {
-                    StreamReader fileReader = new StreamReader(dir);//new file reader
-                    file = new string[File.ReadLines(dir).Count()];//Create an array for the file.
-                    for (int i = 0; i < file.Length; i++)//load the file into memory
+                    if (LASTLINE != message)
                     {
-                        file[i] = fileReader.ReadLine();
+                        streamWriter.WriteLine("new messages");
+                        streamWriter.Flush();
+                        StreamReader fileReader = new StreamReader(dir);//new file reader
+                        file = new string[File.ReadLines(dir).Count()];//Create an array for the file.
+                        for (int i = 0; i < file.Length; i++)//load the file into memory
+                        {
+                            file[i] = fileReader.ReadLine();
+                        }
+                        fileReader.Close();//stop reading the flie
+                        while (file[tempInt] != message)//get the linenumber that we loose messages on.
+                        {
+                            tempInt++;
+                            if(tempInt == file.Length)
+                            {
+                                tempInt--;
+                                file[tempInt] = message;
+                            }
+                        }
+                        lostLines = new string[file.Length - tempInt];
+                        for (int i = tempInt; i < file.Length; i++)
+                        {//load the unused lines into ram
+                            lostLines[anotherint] = file[i];
+                            anotherint++;
+                        }
+                        streamWriter.WriteLine(lostLines.Length);
+                        streamWriter.Flush();
+                        Console.WriteLine(lostLines.Length);
+                        for (int i = 0; i < lostLines.Length; i++)
+                        {
+                            streamWriter.WriteLine(lostLines[i]);
+                            streamWriter.Flush();
+                        }
+                        LASTLINE = message;
+
                     }
-                    fileReader.Close();//stop reading the flie
-                    while (file[tempInt] != message)//get the linenumber that we loose messages on.
-                    {
-                        tempInt++;
-                    }
-                    lostLines = new string[file.Length - tempInt];
-                     for(int i = tempInt; i < file.Length; i++){//load the unused lines into ram
-                         lostLines[anotherint] = file[i];
-                         anotherint++;
-                     }
-                    streamWriter.WriteLine(lostLines.Length);
-                    streamWriter.Flush();
-                    Console.WriteLine(lostLines.Length);
-                     for (int i = 0; i < lostLines.Length; i++)
-                     {
-                         streamWriter.WriteLine(lostLines[i]);
-                         streamWriter.Flush();
-                     }
-                     
                 }
             }
         }
@@ -161,7 +175,7 @@ namespace ChatAppServer
             SqliteDataReader reader = sqlitecommand.ExecuteReader();
             while (reader.Read())
             {
-                chatsTemp[i] = Convert.ToString (reader["Sessionid"]);
+                chatsTemp[i] = Convert.ToString (reader["Sessionid"] + "|"+reader["usernameOne"]+"|"+reader["usernameTwo"]);
                 i++;
             }
             chat = new string[chatsTemp.Count(x => x != null)];

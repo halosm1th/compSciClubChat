@@ -104,7 +104,7 @@ namespace ChatAppServer
                         streamWriter.Close();
                         streamReader.Close();
                         networkStream.Close();
-                        Console.WriteLine(username + "had finsihed");
+                        Console.WriteLine(username + " has finsihed");
                        
                     }
 
